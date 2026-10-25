@@ -1,0 +1,14 @@
+.build/
+build/
+.swiftpm/
+DerivedData/
+xcuserdata/
+
+.DS_Store
+.vscode/
+.idea/
+
+.claude/
+.superpowers/
+
+docs/
