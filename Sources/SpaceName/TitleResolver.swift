@@ -9,7 +9,7 @@ final class TitleResolver: NSObject {
   private(set) var cache = TitleCache()
   var onChange: (() -> Void)?
 
-  private static let searchBudget: TimeInterval = 0.25
+  private static let searchBudget: TimeInterval = 5
   private static let notifications = [
     kAXWindowCreatedNotification, kAXTitleChangedNotification,
     kAXFocusedWindowChangedNotification, kAXMainWindowChangedNotification,
