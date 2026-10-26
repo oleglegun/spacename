@@ -4,7 +4,8 @@ Shows which VS Code projects are on each Space, right under the Space thumbnails
 
 I keep a lot of VS Code windows in full screen and Split View across three monitors. Mission Control
 labels a Split View Space just "Code", so finding the right project meant flipping through every Space.
-Now each thumbnail gets a yellow label listing its projects, one per line.
+Now each thumbnail gets a yellow label listing its projects, one per line. A window opened on a git
+worktree gets a `⎇` in front of its name.
 
 Only VS Code windows are shown. Everything else is ignored.
 

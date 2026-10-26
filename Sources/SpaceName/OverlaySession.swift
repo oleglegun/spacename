@@ -15,6 +15,7 @@ final class OverlaySession {
   private var displays: [DisplayInfo] = []
   private var windows: [CodeWindow] = []
   private var labels: [UInt64: [String]] = [:]
+  private var worktrees: Set<String> = []
   private var bars: [SpacesBar] = []
   private var snapshotAt = Date.distantPast
 
@@ -25,6 +26,7 @@ final class OverlaySession {
   func begin() {
     if let state, state.phase != .ended { return }
     state = SessionState(openedAt: Date())
+    worktrees = worktreeNames(folders: CodeFolders.open())
     resolver.refreshVisible()
     snapshot()
     resolver.resolveMissing(candidates: windows)
@@ -64,6 +66,7 @@ final class OverlaySession {
 
   private func relabel() {
     labels = spaceLabels(displays: displays, windows: windows, titles: resolver.cache.titles)
+      .mapValues { marked($0, worktrees: worktrees) }
     render()
   }
 
