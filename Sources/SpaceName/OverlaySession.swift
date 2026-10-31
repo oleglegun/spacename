@@ -86,12 +86,16 @@ final class OverlaySession {
     for (spaceID, pill) in pills where !shown.contains(spaceID) { pill.orderOut(nil) }
   }
 
+  /// Pills live for one opening. A pill kept across days of lid closes, Dock restarts and Spaces moving between
+  /// displays ended up ordered front yet never shown on some Spaces, while a new window in its place was shown
+  /// (measured on macOS 15.8).
   private func end() {
     timer?.invalidate()
     timer = nil
     resolver.onChange = nil
     bars = []
-    for pill in pills.values { pill.orderOut(nil) }
+    for pill in pills.values { pill.close() }
+    pills = [:]
   }
 }
 
