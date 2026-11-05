@@ -40,7 +40,7 @@ final class OverlaySession {
   private func step() {
     guard var state else { return }
     let now = Date()
-    let read = DockMissionControl.read()
+    let read = MissionControl.read()
     switch read {
     case .open(let current):
       state.observe(.open, at: now)
@@ -106,7 +106,7 @@ extension NSScreen {
     return CFUUIDCreateString(nil, uuid) as String
   }
 
-  /// The frame with a top-left origin at the primary display, as the Dock reports its bars.
+  /// The frame with a top-left origin at the primary display, as Mission Control reports its bars.
   func axFrame(primaryHeight: CGFloat) -> CGRect {
     CGRect(x: frame.minX, y: primaryHeight - frame.maxY, width: frame.width, height: frame.height)
   }

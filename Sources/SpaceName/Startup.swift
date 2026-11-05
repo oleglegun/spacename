@@ -1,17 +1,17 @@
 import AppKit
 import ApplicationServices
+import SpaceNameSystem
 
 /// Starts watching once Accessibility is granted. Until then a two-second check waits for the grant and stops
 /// for good once it comes, so a fresh install starts working without a restart.
 final class Startup {
   private let resolver = TitleResolver()
   private lazy var session = OverlaySession(resolver: resolver)
-  private lazy var watcher = DockWatcher { [weak self] in self?.session.begin() }
   private var trustCheck: Timer?
 
   func run() {
-    // Set on the system-wide element, the timeout covers every element this process reads — the Dock's bar
-    // and VS Code's windows alike. Unset, a busy app holds the main thread for about six seconds per call.
+    // Set on the system-wide element, the timeout covers every element this process reads — Mission Control's
+    // bar and VS Code's windows alike. Unset, a busy app holds the main thread for about six seconds per call.
     AXUIElementSetMessagingTimeout(AXUIElementCreateSystemWide(), 0.25)
     let prompt = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
     if AXIsProcessTrustedWithOptions(prompt) { return startWatching() }
@@ -27,6 +27,8 @@ final class Startup {
 
   private func startWatching() {
     resolver.start()
-    watcher.start()
+    if !SkyLight.observeMissionControl({ [weak self] in self?.session.begin() }) {
+      NSLog("SpaceName: WindowServer refused the Mission Control observer")
+    }
   }
 }

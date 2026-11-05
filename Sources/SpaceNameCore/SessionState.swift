@@ -1,16 +1,16 @@
 import Foundation
 
-public enum DockRead {
+public enum MissionControlRead {
   case open
   case closed
-  /// The Dock did not answer; says nothing about Mission Control.
+  /// WindowManager did not answer; says nothing about Mission Control.
   case failed
 }
 
-/// One Mission Control opening, from the Dock's notification to the bar going away. The notification can land
-/// before the bar exists, and a single read can miss mid-animation, so neither ends a session on its own: the bar
-/// must be gone for `closeDebounce`. An opening that never shows a bar — App Exposé, a quick peek — ends after
-/// `waitLimit`.
+/// One Mission Control opening, from WindowServer's event to the bar going away. The event can land before the
+/// bar exists, and a single read can miss mid-animation, so neither ends a session on its own: the bar must be
+/// gone for `closeDebounce`. An event with no bar after it — Mission Control closing, App Exposé, a quick peek —
+/// ends after `waitLimit`.
 public struct SessionState {
   public enum Phase: Equatable { case waiting, live, ended }
 
@@ -25,7 +25,7 @@ public struct SessionState {
     self.openedAt = openedAt
   }
 
-  public mutating func observe(_ read: DockRead, at now: Date) {
+  public mutating func observe(_ read: MissionControlRead, at now: Date) {
     switch phase {
     case .ended:
       return

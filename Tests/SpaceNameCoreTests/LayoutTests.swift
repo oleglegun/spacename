@@ -2,21 +2,12 @@ import XCTest
 @testable import SpaceNameCore
 
 final class LayoutTests: XCTestCase {
-  func testPillHangsBelowButtonByLabelGap() {
-    let button = SpaceButton(frame: CGRect(x: 100, y: 20, width: 170, height: 92), labelFrame: nil)
+  func testPillLinesUpWithThumbnailUnderTheName() {
+    let button = SpaceButton(frame: CGRect(x: 1473, y: 13, width: 190, height: 129))
 
     let frame = pillFrame(button: button, lineCount: 2, primaryScreenHeight: 1440)
 
-    XCTAssertEqual(frame, CGRect(x: 100, y: 1440 - (112 + PillStyle.labelGap) - 38, width: 170, height: 38))
-  }
-
-  func testPillHangsBelowLabelWhenKnown() {
-    let button = SpaceButton(frame: CGRect(x: 100, y: 20, width: 170, height: 92),
-                             labelFrame: CGRect(x: 100, y: 115, width: 170, height: 15))
-
-    let frame = pillFrame(button: button, lineCount: 1, primaryScreenHeight: 1440)
-
-    XCTAssertEqual(frame, CGRect(x: 100, y: 1440 - 132 - 23, width: 170, height: 23))
+    XCTAssertEqual(frame, CGRect(x: 1488, y: 1440 - 142 - 38, width: 160, height: 38))
   }
 
   private let screen = ScreenRef(uuid: "A", axFrame: CGRect(x: -2560, y: -323, width: 2560, height: 1440))
@@ -27,7 +18,7 @@ final class LayoutTests: XCTestCase {
 
   private func bar(buttons count: Int, displayFrame: CGRect? = nil) -> SpacesBar {
     SpacesBar(displayFrame: displayFrame ?? CGRect(x: -2560, y: -323, width: 2560, height: 1440),
-              buttons: (0..<count).map { SpaceButton(frame: CGRect(x: -1936 + CGFloat($0) * 192, y: -295, width: 160, height: 90), labelFrame: nil) })
+              buttons: (0..<count).map { SpaceButton(frame: CGRect(x: -1936 + CGFloat($0) * 192, y: 77.5, width: 190, height: 129)) })
   }
 
   func testZipsButtonsWithSpacesOnMatchedScreen() {

@@ -11,7 +11,7 @@ Only VS Code windows are shown. Everything else is ignored.
 
 ## Install
 
-Needs macOS 15 and Xcode 16+.
+Needs macOS 27 and Xcode 16+.
 
 ```bash
 git clone https://github.com/oleglegun/spacename.git
@@ -20,7 +20,8 @@ make install
 ```
 
 This builds `SpaceName.app`, copies it to `~/Applications` and starts it. On first launch macOS asks
-for Accessibility access, the only permission it needs. It also adds itself to login items; untick
+for Accessibility access, the only permission it needs (on macOS 27 it sits in System Settings → Privacy &
+Security → Device Control and Data Access). It also adds itself to login items; untick
 «Запускать при входе» in its menu bar menu if you don't want that.
 
 Set the VS Code window title to the folder name, otherwise the labels will include file names:
@@ -31,15 +32,16 @@ Set the VS Code window title to the folder name, otherwise the labels will inclu
 
 ## How it works
 
-When Mission Control opens, the Dock sends an accessibility notification. SpaceName reads where the
-Space buttons are, finds VS Code's windows and their Spaces through SkyLight, and puts a click-through
-label under each button. Titles come from the Accessibility API, so no Screen Recording permission.
+When Mission Control opens, WindowServer posts an event. SpaceName reads where the Space buttons are
+from WindowManager's accessibility tree, finds VS Code's windows and their Spaces through SkyLight, and
+puts a click-through label under each button. Titles come from the Accessibility API, so no Screen Recording permission.
 Nothing runs while Mission Control is closed.
 
 ## Caveats
 
-- It relies on private and undocumented APIs (SkyLight, the Dock's accessibility tree). Tested on
-  macOS 15.8; a new macOS version may break it.
+- It relies on private and undocumented APIs (SkyLight, WindowManager's accessibility tree). Tested on
+  macOS 27.2; a new macOS version may break it. On macOS 15 Mission Control lived in the Dock, and this
+  version doesn't read it there.
 - "Displays have separate Spaces" has to be on.
 - The collapsed Spaces bar isn't handled; labels assume the thumbnails are showing.
 - The app is ad-hoc signed with a requirement on its bundle id, so the Accessibility grant survives

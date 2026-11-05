@@ -19,6 +19,21 @@ public enum SkyLight {
     return unsafeBitCast(pointer, to: type)
   }
 
+  private typealias NotifyProc = @convention(c) (UInt32, UnsafeMutableRawPointer?, Int, UnsafeMutableRawPointer?) -> Void
+  private typealias RegisterNotifyProc = @convention(c) (NotifyProc, UInt32, UnsafeMutableRawPointer?) -> Int32
+  private static let registerNotifyProc = symbol("SLSRegisterNotifyProc", as: RegisterNotifyProc.self)
+  /// Posted as Mission Control opens and again as it closes; switching apps does not post it (measured on
+  /// macOS 27.2, where the Dock no longer sends its AXExpose notifications).
+  private static let missionControlEvent: UInt32 = 1327
+  private static var onMissionControl: (() -> Void)?
+
+  /// Calls `handler` on the main thread each time Mission Control opens or closes. False when WindowServer refuses.
+  public static func observeMissionControl(_ handler: @escaping () -> Void) -> Bool {
+    guard let register = registerNotifyProc else { return false }
+    onMissionControl = handler
+    return register({ _, _, _, _ in DispatchQueue.main.async { SkyLight.onMissionControl?() } }, missionControlEvent, nil) == 0
+  }
+
   public static func displays() -> [DisplayInfo] {
     guard let copy = copyManagedDisplaySpaces,
           let raw = copy(connection)?.takeRetainedValue() as? [[String: Any]] else { return [] }

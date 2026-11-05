@@ -37,15 +37,12 @@ public struct CodeWindow: Equatable {
   }
 }
 
-/// A Space's button in Mission Control's bar. The label is the system name under it ("Desktop 2", "Code"),
-/// when the Dock exposes it as a child of the button.
+/// A Space's button in Mission Control's bar: its thumbnail and the system name under it ("Desktop 2", "Code").
 public struct SpaceButton: Equatable {
   public let frame: CGRect
-  public let labelFrame: CGRect?
 
-  public init(frame: CGRect, labelFrame: CGRect?) {
+  public init(frame: CGRect) {
     self.frame = frame
-    self.labelFrame = labelFrame
   }
 }
 
@@ -72,14 +69,20 @@ public func knownTitle(_ raw: String?) -> String? {
   return title
 }
 
-/// A bar whose frames were all read. One frame the Dock failed to answer for makes the whole read unusable — a
-/// pill drawn from a missing frame lands at the screen's corner.
-public func assembleBar(displayFrame: CGRect?, buttons: [(frame: CGRect?, labelFrame: CGRect?)]) -> SpacesBar? {
+/// WindowManager reports a Space button's position at the button's center, not its top-left corner (macOS 27.2;
+/// its display frames are reported as usual).
+public func spaceButtonFrame(reported: CGRect) -> CGRect {
+  reported.offsetBy(dx: -reported.width / 2, dy: -reported.height / 2)
+}
+
+/// A bar whose frames were all read. One frame WindowManager failed to answer for makes the whole read unusable —
+/// a pill drawn from a missing frame lands at the screen's corner.
+public func assembleBar(displayFrame: CGRect?, buttons: [CGRect?]) -> SpacesBar? {
   guard let displayFrame else { return nil }
   var assembled: [SpaceButton] = []
-  for button in buttons {
-    guard let frame = button.frame else { return nil }
-    assembled.append(SpaceButton(frame: frame, labelFrame: button.labelFrame))
+  for frame in buttons {
+    guard let frame else { return nil }
+    assembled.append(SpaceButton(frame: frame))
   }
   return SpacesBar(displayFrame: displayFrame, buttons: assembled)
 }
