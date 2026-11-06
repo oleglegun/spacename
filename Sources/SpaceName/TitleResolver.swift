@@ -38,7 +38,7 @@ final class TitleResolver: NSObject {
     onChange?()
   }
 
-  func resolveMissing(candidates: [CodeWindow]) {
+  func resolveMissing(candidates: [AppWindow]) {
     guard let pid = code?.processIdentifier else { return }
     let ids = candidates.map(\.id)
     cache.prune(keeping: Set(ids))

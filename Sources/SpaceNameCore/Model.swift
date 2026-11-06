@@ -24,7 +24,8 @@ public struct DisplayInfo: Equatable {
   }
 }
 
-public struct CodeWindow: Equatable {
+/// A VS Code or Terminal window and the Spaces SkyLight puts it on.
+public struct AppWindow: Equatable {
   public let id: UInt32
   public let spaceIDs: [UInt64]
   /// Top-left origin, as CoreGraphics and Accessibility report it.

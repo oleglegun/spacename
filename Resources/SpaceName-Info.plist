@@ -12,5 +12,6 @@
 	<key>LSMinimumSystemVersion</key><string>15.0</string>
 	<key>LSUIElement</key><true/>
 	<key>NSHighResolutionCapable</key><true/>
+	<key>NSAppleEventsUsageDescription</key><string>SpaceName подписывает под миниатюрами столов в Mission Control названия вкладок Терминала.</string>
 </dict>
 </plist>

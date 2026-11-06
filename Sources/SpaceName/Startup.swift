@@ -6,7 +6,8 @@ import SpaceNameSystem
 /// for good once it comes, so a fresh install starts working without a restart.
 final class Startup {
   private let resolver = TitleResolver()
-  private lazy var session = OverlaySession(resolver: resolver)
+  private let terminal = TerminalReader()
+  private lazy var session = OverlaySession(resolver: resolver, terminal: terminal)
   private var trustCheck: Timer?
 
   func run() {
@@ -27,6 +28,7 @@ final class Startup {
 
   private func startWatching() {
     resolver.start()
+    terminal.start()
     if !SkyLight.observeMissionControl({ [weak self] in self?.session.begin() }) {
       NSLog("SpaceName: WindowServer refused the Mission Control observer")
     }

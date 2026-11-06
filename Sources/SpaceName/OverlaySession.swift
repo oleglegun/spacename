@@ -9,18 +9,21 @@ final class OverlaySession {
   private static let resnapshot: TimeInterval = 0.25
 
   private let resolver: TitleResolver
+  private let terminal: TerminalReader
   private var state: SessionState?
   private var timer: Timer?
   private var pills: [UInt64: PillWindow] = [:]
   private var displays: [DisplayInfo] = []
-  private var windows: [CodeWindow] = []
+  private var windows: [AppWindow] = []
+  private var terminalWindows: [AppWindow] = []
   private var labels: [UInt64: [String]] = [:]
   private var worktrees: Set<String> = []
   private var bars: [SpacesBar] = []
   private var snapshotAt = Date.distantPast
 
-  init(resolver: TitleResolver) {
+  init(resolver: TitleResolver, terminal: TerminalReader) {
     self.resolver = resolver
+    self.terminal = terminal
   }
 
   func begin() {
@@ -31,6 +34,7 @@ final class OverlaySession {
     snapshot()
     resolver.resolveMissing(candidates: windows)
     resolver.onChange = { [weak self] in self?.relabel() }
+    terminal.refresh { [weak self] in self?.relabel() }
     let timer = Timer(timeInterval: Self.tick, repeats: true) { [weak self] _ in self?.step() }
     RunLoop.main.add(timer, forMode: .common)
     self.timer = timer
@@ -60,13 +64,15 @@ final class OverlaySession {
   private func snapshot() {
     displays = SkyLight.displays()
     windows = CodeWindows.runningApp().map { CodeWindows.list(pid: $0.processIdentifier) } ?? []
+    terminalWindows = Terminal.runningApp().map { ownedWindows(pid: $0.processIdentifier) } ?? []
     snapshotAt = Date()
     relabel()
   }
 
   private func relabel() {
-    labels = spaceLabels(displays: displays, windows: windows, titles: resolver.cache.titles)
+    let code = spaceLabels(displays: displays, windows: windows, titles: resolver.cache.titles)
       .mapValues { marked($0, worktrees: worktrees) }
+    labels = combinedLabels(code: code, terminal: terminalLabels(displays: displays, tabs: terminal.tabs, windows: terminalWindows))
     render()
   }
 

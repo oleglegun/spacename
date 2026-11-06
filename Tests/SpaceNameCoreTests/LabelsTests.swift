@@ -6,8 +6,8 @@ final class LabelsTests: XCTestCase {
   private let desktop = SpaceInfo(id: 6877, isFullscreen: false, tileWindowIDs: [])
   private var displays: [DisplayInfo] { [DisplayInfo(uuid: "A", spaces: [splitView, desktop])] }
 
-  private func window(_ id: UInt32, on spaces: [UInt64], minX: CGFloat = 0) -> CodeWindow {
-    CodeWindow(id: id, spaceIDs: spaces, frame: CGRect(x: minX, y: 0, width: 1200, height: 1440))
+  private func window(_ id: UInt32, on spaces: [UInt64], minX: CGFloat = 0) -> AppWindow {
+    AppWindow(id: id, spaceIDs: spaces, frame: CGRect(x: minX, y: 0, width: 1200, height: 1440))
   }
 
   func testSplitViewListsLeftToRight() {

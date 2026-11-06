@@ -10,18 +10,23 @@ public enum CodeWindows {
 
   /// Every project window VS Code has, on any Space. Titles are not here: the window list hides them without
   /// Screen Recording.
-  public static func list(pid: pid_t) -> [CodeWindow] {
-    guard let info = CGWindowListCopyWindowInfo([.optionAll], kCGNullWindowID) as? [[String: Any]] else { return [] }
-    return info.compactMap { window in
-      guard (window[kCGWindowOwnerPID as String] as? NSNumber)?.int32Value == pid,
-            (window[kCGWindowLayer as String] as? NSNumber)?.intValue == 0,
-            let number = window[kCGWindowNumber as String] as? NSNumber,
-            let bounds = window[kCGWindowBounds as String] as? NSDictionary,
-            let frame = CGRect(dictionaryRepresentation: bounds),
-            isCandidateMainWindow(frame) else { return nil }
-      let wid = number.uint32Value
-      return CodeWindow(id: wid, spaceIDs: SkyLight.spaceIDs(ofWindow: wid), frame: frame)
-    }
+  public static func list(pid: pid_t) -> [AppWindow] {
+    ownedWindows(pid: pid, keep: isCandidateMainWindow)
+  }
+}
+
+/// A process's windows on any Space whose frame `keep` accepts. Layer 0 only: menus and tooltips sit above it.
+public func ownedWindows(pid: pid_t, keep: (CGRect) -> Bool = { _ in true }) -> [AppWindow] {
+  guard let info = CGWindowListCopyWindowInfo([.optionAll], kCGNullWindowID) as? [[String: Any]] else { return [] }
+  return info.compactMap { window in
+    guard (window[kCGWindowOwnerPID as String] as? NSNumber)?.int32Value == pid,
+          (window[kCGWindowLayer as String] as? NSNumber)?.intValue == 0,
+          let number = window[kCGWindowNumber as String] as? NSNumber,
+          let bounds = window[kCGWindowBounds as String] as? NSDictionary,
+          let frame = CGRect(dictionaryRepresentation: bounds),
+          keep(frame) else { return nil }
+    let wid = number.uint32Value
+    return AppWindow(id: wid, spaceIDs: SkyLight.spaceIDs(ofWindow: wid), frame: frame)
   }
 }
 
