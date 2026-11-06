@@ -9,7 +9,10 @@ public enum Terminal {
   private static let queue = DispatchQueue(label: "SpaceName.terminal", qos: .userInitiated)
   /// A Terminal that stops answering must not keep the pills waiting.
   private static let deadline: TimeInterval = 3
-  /// Checks it is running first: a bare `tell` would launch it.
+  /// Checks it is running first: a bare `tell` would launch it. Terminal's window list can hold something that is no
+  /// window — class `item`, no id, no bounds, absent from its Window menu — and one error would fail the whole read,
+  /// leaving every pill on the last good one. So each window is on its own, except for a timeout (-1712): that is
+  /// Terminal not answering, not a window to skip.
   private static let script = """
     if application id "\(bundleID)" is running then
       tell application id "\(bundleID)"
@@ -17,11 +20,15 @@ public enum Terminal {
           set AppleScript's text item delimiters to ","
           set out to ""
           repeat with w in windows
-            set head to ((id of w) as text) & (character id 31) & ((bounds of w) as text) & (character id 31)
-            set wname to name of w
-            repeat with t in tabs of w
-              set out to out & head & (custom title of t) & (character id 31) & wname & (character id 30)
-            end repeat
+            try
+              set head to ((id of w) as text) & (character id 31) & ((bounds of w) as text) & (character id 31)
+              set wname to name of w
+              repeat with t in tabs of w
+                set out to out & head & (custom title of t) & (character id 31) & wname & (character id 30)
+              end repeat
+            on error message number code
+              if code is -1712 then error message number code
+            end try
           end repeat
           return out
         end timeout
@@ -54,7 +61,7 @@ public enum Terminal {
     return AEDeterminePermissionToAutomateTarget(target.aeDesc, AEEventClass(kCoreEventClass), AEEventID(kAEGetData), ask)
   }
 
-  private static func runScript() -> [TerminalTab]? {
+  static func runScript() -> [TerminalTab]? {
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
     process.arguments = ["-e", script]
